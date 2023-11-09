@@ -1,5 +1,7 @@
 import express from "express";
 
+import { router as userRouter } from "./routes";
+
 const app = express();
 const cors = require("cors");
 
@@ -12,6 +14,8 @@ app.get("/", (_req, res) => {
   console.log("Hello World");
   res.send("Hello World");
 });
+
+app.use("/api/users", userRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
