@@ -49,6 +49,20 @@ router.delete('/:id', (request, response) => {
   response.status(204).end();
 });
 
+router.post('/', (request, response) => {
+  const { name, email, password } = request.body;
+  const newUser = {
+    id: 4,
+    name,
+    email,
+    password,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+  users.push(newUser);
+  response.status(200).json({ message: 'User created successfully' }).end();
+});
+
 // router.get("/", (_req, _res, next) => {
 //   setTimeout(() => {
 //     try {
