@@ -1,6 +1,7 @@
 import express from 'express';
 import { handleErrors } from '../midldlewares';
 import { IUser } from '../types';
+import { generateId } from '../utils';
 
 export let users: IUser[] = [
   {
@@ -52,7 +53,7 @@ router.delete('/:id', (request, response) => {
 router.post('/', (request, response) => {
   const { name, email, password } = request.body;
   const newUser = {
-    id: 4,
+    id: generateId(),
     name,
     email,
     password,
