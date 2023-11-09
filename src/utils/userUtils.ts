@@ -1,31 +1,4 @@
-import { IUser } from "../types";
-
-export let users: IUser[] = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "johndoe@gmail.com",
-    password: "123456",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 2,
-    name: "James Doe",
-    email: "Jamesdoe@gmail.com",
-    password: "123456",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 3,
-    name: "Jane Doe",
-    email: "Janedoe@gmail.com",
-    password: "123456",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
+import { users } from '../routes';
 
 export const generateId = () => {
   const notesIds = users.map((n) => n.id);
