@@ -31,14 +31,21 @@ export let users: IUser[] = [
 
 export const router = express.Router();
 
-router.get('/', (_req, res, _next) => {
-  res.json(users);
+router.get('/', (_request, response, _next) => {
+  if (!users.length) response.status(404).json({ msg: 'Users not found' });
+  response.status(200).json(users);
+});
+
+router.get('/:id', (request, response, _next) => {
+  const id = Number(request.params.id);
+  const user = users.filter((user) => user.id === id);
+  if (!user.length) response.status(404).json({ msg: 'User not found' });
+  response.status(200).json(user);
 });
 
 router.delete('/:id', (request, response) => {
   const id = Number(request.params.id);
   users = users.filter((user) => user.id !== id);
-
   response.status(204).end();
 });
 
