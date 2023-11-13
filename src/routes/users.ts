@@ -1,5 +1,6 @@
 import express from 'express';
-import { handleErrors } from '../midldlewares';
+import { handleErrors, validateSchema } from '../midldlewares';
+import { UserSchema, idParamSchema } from '../schemas/UserSchema';
 import { IUser } from '../types';
 
 export let users: IUser[] = [
@@ -36,14 +37,14 @@ router.get('/', (_request, response, _next) => {
   response.status(200).json(users);
 });
 
-router.get('/:id', (request, response, _next) => {
+router.get('/:id', validateSchema(idParamSchema), (request, response, _next) => {
   const id = Number(request.params.id);
   const user = users.filter((user) => user.id === id);
   if (!user.length) response.status(404).json({ msg: 'User not found' });
   response.status(200).json(user);
 });
 
-router.put('/:id', (request, response) => {
+router.put('/:id', validateSchema(UserSchema), (request, response) => {
   const id = Number(request.params.id);
   const body = request.body;
   const user = users.filter((user) => user.id === id);
@@ -54,7 +55,7 @@ router.put('/:id', (request, response) => {
   response.status(204).end();
 });
 
-router.delete('/:id', (request, response) => {
+router.delete('/:id', validateSchema(idParamSchema), (request, response) => {
   const id = Number(request.params.id);
   users = users.filter((user) => user.id !== id);
   response.status(204).end();
