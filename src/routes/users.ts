@@ -159,11 +159,11 @@ router.post('/login', validateSchema(UserLoginSchema), (request, response) => {
     const user = users.find((user) => user.email === email);
 
     if (!user) {
-      return response.status(500).json({ msg: 'Invalid credentials' }).end();
+      return response.status(403).json({ msg: 'Invalid credentials' }).end();
     }
 
     if (user.password !== password) {
-      return response.status(500).json({ msg: 'Invalid credentials' }).end();
+      return response.status(403).json({ msg: 'Invalid credentials' }).end();
     }
 
     const { firstName, lastName } = user;

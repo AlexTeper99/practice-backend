@@ -7,7 +7,7 @@ export const UserPostSchema = yup.object({
     firstNameKana: yup.string().min(4).max(32).required(),
     lastNameKana: yup.string().min(4).max(32).required(),
     phoneNumber: yup.string().min(8).max(32).required(),
-    email: yup.string().min(8).max(32).required(),
+    email: yup.string().email().min(8).max(32).required(),
     gender: yup.string().oneOf(['male', 'female'], 'Gender must be male or female').required(),
     birthDate: yup.date().required(),
     password: yup.string().min(8).max(32).required(),
@@ -18,7 +18,7 @@ export const UserPostSchema = yup.object({
 
 export const UserLoginSchema = yup.object({
   body: yup.object({
-    email: yup.string().min(8).max(32).required(),
+    email: yup.string().email().min(8).max(32).required(),
     password: yup.string().min(8).max(32).required(),
   }),
 });
