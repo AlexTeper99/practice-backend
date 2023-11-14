@@ -16,6 +16,13 @@ export const UserPostSchema = yup.object({
   }),
 });
 
+export const UserLoginSchema = yup.object({
+  body: yup.object({
+    email: yup.string().min(8).max(32).required(),
+    password: yup.string().min(8).max(32).required(),
+  }),
+});
+
 export const UserPutSchema = yup.object({
   body: yup.object({
     firstName: yup.string().min(4).max(32).required(),

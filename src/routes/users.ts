@@ -1,13 +1,17 @@
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import { handleErrors, validateSchema } from '../midldlewares';
 import {
   UserPasswordPutSchema,
   UserPostSchema,
   UserPutSchema,
   IdParamSchema,
+  UserLoginSchema,
 } from '../schemas/UserSchema';
 import { IUser } from '../types';
 import { generateId } from '../utils';
+
+const secret = process.env.SECRET || 'dashduiah5d41as5d';
 
 export let users: IUser[] = [
   {
@@ -142,6 +146,36 @@ router.delete('/:id', validateSchema(IdParamSchema), (request, response) => {
     const index = users.findIndex((user) => user.id === id);
     users[index] = user[0];
     response.status(204).end();
+  } catch (error) {
+    response.status(500).json({ msg: error }).end();
+  }
+});
+
+router.post('/login', validateSchema(UserLoginSchema), (request, response) => {
+  try {
+    const { body } = request.body;
+    const { email, password } = body;
+
+    const user = users.find((user) => user.email === email);
+
+    if (!user) {
+      return response.status(500).json({ msg: 'Invalid credentials' }).end();
+    }
+
+    if (user.password !== password) {
+      return response.status(500).json({ msg: 'Invalid credentials' }).end();
+    }
+
+    const token = jwt.sign({ email: user.email, name: user.firstName }, secret, {
+      expiresIn: '1h',
+    });
+
+    const { firstName, lastName } = user;
+
+    response
+      .status(201)
+      .json({ msg: 'User logged successfully', token, firstName, lastName })
+      .end();
   } catch (error) {
     response.status(500).json({ msg: error }).end();
   }
