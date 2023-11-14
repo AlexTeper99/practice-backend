@@ -166,11 +166,11 @@ router.post('/login', validateSchema(UserLoginSchema), (request, response) => {
       return response.status(500).json({ msg: 'Invalid credentials' }).end();
     }
 
-    const token = jwt.sign({ email: user.email, name: user.firstName }, secret, {
-      expiresIn: '1h',
-    });
-
     const { firstName, lastName } = user;
+
+    const token = jwt.sign({ email: user.email, firstName }, secret, {
+      expiresIn: '30 days',
+    });
 
     response
       .status(201)
