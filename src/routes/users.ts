@@ -9,7 +9,7 @@ import {
   UserLoginSchema,
 } from '../schemas/UserSchema';
 import { IUser } from '../types';
-import { generateId } from '../utils';
+import { comparePassword, generateId, hashPassword } from '../utils';
 
 const secret = process.env.SECRET || 'dashduiah5d41as5d';
 
@@ -86,7 +86,7 @@ router.get('/:id', validateSchema(IdParamSchema), (request, response, _next) => 
   }
 });
 
-router.post('/', validateSchema(UserPostSchema), (request, response) => {
+router.post('/', validateSchema(UserPostSchema), async (request, response) => {
   const { body } = request.body;
   try {
     const user = users.filter((user) => user.email === body.email);
@@ -94,6 +94,7 @@ router.post('/', validateSchema(UserPostSchema), (request, response) => {
     const newUser = {
       id: generateId(),
       ...body,
+      password: await hashPassword(body.password, 10),
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -119,24 +120,29 @@ router.put('/:id', validateSchema(UserPutSchema), (request, response) => {
   }
 });
 
-router.put('/update-password/:id', validateSchema(UserPasswordPutSchema), (request, response) => {
-  const id = Number(request.params.id);
-  const { body } = request.body;
-  try {
-    const user = users.filter((user) => user.id === id);
-    if (!user.length) response.status(409).json({ msg: 'User not found' });
-    if (user[0].password !== body.currentPassword)
-      response.status(409).json({ msg: 'The current password you entered do not match' });
-    if (body.newPassword !== body.confirmationNewPassword)
-      response.status(409).json({ msg: 'The new password and the confirmation do not match' });
-    user[0] = { ...user[0], password: body.newPassword };
-    const index = users.findIndex((user) => user.id === id);
-    users[index] = user[0];
-    response.status(204).end();
-  } catch (error) {
-    response.status(500).json({ msg: error }).end();
+router.put(
+  '/update-password/:id',
+  validateSchema(UserPasswordPutSchema),
+  async (request, response) => {
+    const id = Number(request.params.id);
+    const { body } = request.body;
+    try {
+      const user = users.filter((user) => user.id === id);
+      if (!user.length) response.status(409).json({ msg: 'User not found' });
+      const isValidPassword = await comparePassword(body.currentPassword, user[0].password);
+      if (!isValidPassword)
+        response.status(409).json({ msg: 'The current password you entered do not match' });
+      if (body.newPassword !== body.confirmationNewPassword)
+        response.status(409).json({ msg: 'The new password and the confirmation do not match' });
+      user[0] = { ...user[0], password: await hashPassword(body.newPassword, 10) };
+      const index = users.findIndex((user) => user.id === id);
+      users[index] = user[0];
+      response.status(204).end();
+    } catch (error) {
+      response.status(500).json({ msg: error }).end();
+    }
   }
-});
+);
 
 router.delete('/:id', validateSchema(IdParamSchema), (request, response) => {
   const id = Number(request.params.id);
@@ -151,7 +157,7 @@ router.delete('/:id', validateSchema(IdParamSchema), (request, response) => {
   }
 });
 
-router.post('/login', validateSchema(UserLoginSchema), (request, response) => {
+router.post('/login', validateSchema(UserLoginSchema), async (request, response) => {
   try {
     const { body } = request.body;
     const { email, password } = body;
@@ -162,7 +168,8 @@ router.post('/login', validateSchema(UserLoginSchema), (request, response) => {
       return response.status(401).json({ msg: 'Invalid credentials' }).end();
     }
 
-    if (user.password !== password) {
+    const isValidPassword = await comparePassword(password, user.password);
+    if (!isValidPassword) {
       return response.status(401).json({ msg: 'Invalid credentials' }).end();
     }
 
