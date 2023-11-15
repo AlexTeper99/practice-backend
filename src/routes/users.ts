@@ -109,11 +109,11 @@ router.put('/:id', validateSchema(UserPutSchema), (request, response) => {
   const id = Number(request.params.id);
   const { body } = request.body;
   try {
-    const user = users.filter((user) => user.id === id);
-    if (!user.length) response.status(409).json({ msg: 'User not found' });
-    user[0] = { ...user[0], ...body };
-    const index = users.findIndex((user) => user.id === id);
-    users[index] = user[0];
+    const userIndex = users.findIndex((user) => user.id === id);
+    let user = users[userIndex];
+    if (!user) response.status(409).json({ msg: 'User not found' });
+    user = { ...user, ...body };
+    users[userIndex] = user;
     response.status(204).end();
   } catch (error) {
     response.status(500).json({ msg: error }).end();
@@ -127,16 +127,16 @@ router.put(
     const id = Number(request.params.id);
     const { body } = request.body;
     try {
-      const user = users.filter((user) => user.id === id);
-      if (!user.length) response.status(409).json({ msg: 'User not found' });
-      const isValidPassword = await comparePassword(body.currentPassword, user[0].password);
+      const userIndex = users.findIndex((user) => user.id === id);
+      let user = users[userIndex];
+      if (!user) response.status(409).json({ msg: 'User not found' });
+      const isValidPassword = await comparePassword(body.currentPassword, user.password);
       if (!isValidPassword)
         response.status(409).json({ msg: 'The current password you entered do not match' });
       if (body.newPassword !== body.confirmationNewPassword)
         response.status(409).json({ msg: 'The new password and the confirmation do not match' });
-      user[0] = { ...user[0], password: await hashPassword(body.newPassword, 10) };
-      const index = users.findIndex((user) => user.id === id);
-      users[index] = user[0];
+      user = { ...user, password: await hashPassword(body.newPassword, 10) };
+      users[userIndex] = user;
       response.status(204).end();
     } catch (error) {
       response.status(500).json({ msg: error }).end();
@@ -147,10 +147,11 @@ router.put(
 router.delete('/:id', validateSchema(IdParamSchema), (request, response) => {
   const id = Number(request.params.id);
   try {
-    const user = users.filter((user) => user.id === id);
-    user[0] = { ...user[0], isDeleted: true };
+    const userIndex = users.findIndex((user) => user.id === id);
+    let user = users[userIndex];
+    user = { ...user, isDeleted: true };
     const index = users.findIndex((user) => user.id === id);
-    users[index] = user[0];
+    users[index] = user;
     response.status(204).end();
   } catch (error) {
     response.status(500).json({ msg: error }).end();
