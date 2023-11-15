@@ -120,7 +120,16 @@ export const userController = {
     try {
       const userIndex = users.findIndex((user) => user.id === id);
       let user = users[userIndex];
-      if (!user) response.status(409).json({ msg: 'User not found' });
+      if (!user) {
+        return response.status(409).json({
+          message: null,
+          code: '1000',
+          details: null,
+          object: {
+            msg: 'User not found',
+          },
+        });
+      }
       user = { ...user, ...body };
       users[userIndex] = user;
 
@@ -211,7 +220,16 @@ export const userController = {
     try {
       const userIndex = users.findIndex((user) => user.id === id);
       let user = users[userIndex];
-      if (!user) response.status(409).json({ msg: 'User not found' });
+      if (!user) {
+        return response.status(409).json({
+          message: null,
+          code: '1000',
+          details: null,
+          object: {
+            msg: 'User not found',
+          },
+        });
+      }
       user = { ...user, isDeleted: true };
       users[userIndex] = user;
 
