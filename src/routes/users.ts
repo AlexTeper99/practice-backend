@@ -68,10 +68,34 @@ export const router = express.Router();
 
 router.get('/', (_request, response, _next) => {
   try {
-    if (!users.length) response.status(404).json({ msg: 'Users not found' });
-    response.status(200).json(users);
+    if (!users.length) {
+      return response.status(409).json({
+        message: null,
+        code: '1000',
+        details: null,
+        object: {
+          msg: 'User not found',
+        },
+      });
+    }
+
+    return response.status(200).json({
+      message: null,
+      code: '0000',
+      details: null,
+      object: {
+        users,
+      },
+    });
   } catch (error) {
-    response.status(500).json({ msg: error }).end();
+    return response.status(500).json({
+      message: null,
+      code: '2000',
+      details: null,
+      object: {
+        msg: error,
+      },
+    });
   }
 });
 
@@ -79,10 +103,34 @@ router.get('/:id', validateSchema(IdParamSchema), (request, response, _next) => 
   const id = Number(request.params.id);
   try {
     const user = users.filter((user) => user.id === id);
-    if (!user.length) response.status(404).json({ msg: 'User not found' });
-    response.status(200).json(user);
+    if (!user.length) {
+      return response.status(409).json({
+        message: null,
+        code: '1000',
+        details: null,
+        object: {
+          msg: 'User not found',
+        },
+      });
+    }
+
+    return response.status(200).json({
+      message: null,
+      code: '0000',
+      details: null,
+      object: {
+        user,
+      },
+    });
   } catch (error) {
-    response.status(500).json({ msg: error }).end();
+    return response.status(500).json({
+      message: null,
+      code: '2000',
+      details: null,
+      object: {
+        msg: error,
+      },
+    });
   }
 });
 
@@ -90,7 +138,16 @@ router.post('/', validateSchema(UserPostSchema), (request, response) => {
   const { body } = request.body;
   try {
     const user = users.filter((user) => user.email === body.email);
-    if (user.length) response.status(500).json({ msg: 'User already exist' }).end();
+    if (user.length) {
+      return response.status(500).json({
+        message: null,
+        code: '2000',
+        details: null,
+        object: {
+          msg: 'User already exist',
+        },
+      });
+    }
     const newUser = {
       id: generateId(),
       ...body,
@@ -98,9 +155,24 @@ router.post('/', validateSchema(UserPostSchema), (request, response) => {
       updatedAt: new Date(),
     };
     users.push(newUser);
-    response.status(201).json({ msg: 'User created' }).end();
+
+    return response.status(200).json({
+      message: null,
+      code: '0000',
+      details: null,
+      object: {
+        msg: 'User created',
+      },
+    });
   } catch (error) {
-    response.status(500).json({ msg: error }).end();
+    return response.status(500).json({
+      message: null,
+      code: '2000',
+      details: null,
+      object: {
+        msg: error,
+      },
+    });
   }
 });
 
@@ -109,13 +181,37 @@ router.put('/:id', validateSchema(UserPutSchema), (request, response) => {
   const { body } = request.body;
   try {
     const user = users.filter((user) => user.id === id);
-    if (!user.length) response.status(409).json({ msg: 'User not found' });
+    if (!user.length) {
+      return response.status(409).json({
+        message: null,
+        code: '1000',
+        details: null,
+        object: {
+          msg: 'User not found',
+        },
+      });
+    }
     user[0] = { ...user[0], ...body };
     const index = users.findIndex((user) => user.id === id);
     users[index] = user[0];
-    response.status(204).end();
+
+    return response.status(200).json({
+      message: null,
+      code: '0000',
+      details: null,
+      object: {
+        msg: 'User updated',
+      },
+    });
   } catch (error) {
-    response.status(500).json({ msg: error }).end();
+    return response.status(500).json({
+      message: null,
+      code: '2000',
+      details: null,
+      object: {
+        msg: error,
+      },
+    });
   }
 });
 
@@ -124,17 +220,60 @@ router.put('/update-password/:id', validateSchema(UserPasswordPutSchema), (reque
   const { body } = request.body;
   try {
     const user = users.filter((user) => user.id === id);
-    if (!user.length) response.status(409).json({ msg: 'User not found' });
-    if (user[0].password !== body.currentPassword)
-      response.status(409).json({ msg: 'The current password you entered do not match' });
-    if (body.newPassword !== body.confirmationNewPassword)
-      response.status(409).json({ msg: 'The new password and the confirmation do not match' });
+
+    if (!user.length) {
+      return response.status(409).json({
+        message: null,
+        code: '1000',
+        details: null,
+        object: {
+          msg: 'User not found',
+        },
+      });
+    }
+
+    if (user[0].password !== body.currentPassword) {
+      return response.status(409).json({
+        message: null,
+        code: '1000',
+        details: null,
+        object: {
+          msg: 'The current password you entered do not match',
+        },
+      });
+    }
+    if (body.newPassword !== body.confirmationNewPassword) {
+      return response.status(409).json({
+        message: null,
+        code: '1000',
+        details: null,
+        object: {
+          msg: 'The new password and the confirmation do not match',
+        },
+      });
+    }
+
     user[0] = { ...user[0], password: body.newPassword };
     const index = users.findIndex((user) => user.id === id);
     users[index] = user[0];
-    response.status(204).end();
+
+    return response.status(200).json({
+      message: null,
+      code: '0000',
+      details: null,
+      object: {
+        msg: 'Password updated',
+      },
+    });
   } catch (error) {
-    response.status(500).json({ msg: error }).end();
+    return response.status(500).json({
+      message: null,
+      code: '2000',
+      details: null,
+      object: {
+        msg: error,
+      },
+    });
   }
 });
 
@@ -145,9 +284,26 @@ router.delete('/:id', validateSchema(IdParamSchema), (request, response) => {
     user[0] = { ...user[0], isDeleted: true };
     const index = users.findIndex((user) => user.id === id);
     users[index] = user[0];
-    response.status(204).end();
+
+    console.log(user);
+
+    return response.status(200).json({
+      message: null,
+      code: '0000',
+      details: null,
+      object: {
+        msg: 'User deleted',
+      },
+    });
   } catch (error) {
-    response.status(500).json({ msg: error }).end();
+    return response.status(500).json({
+      message: null,
+      code: '2000',
+      details: null,
+      object: {
+        msg: error,
+      },
+    });
   }
 });
 
@@ -159,11 +315,25 @@ router.post('/login', validateSchema(UserLoginSchema), (request, response) => {
     const user = users.find((user) => user.email === email);
 
     if (!user) {
-      return response.status(401).json({ msg: 'Invalid credentials' }).end();
+      return response.status(401).json({
+        message: null,
+        code: '1000',
+        details: null,
+        object: {
+          msg: 'Invalid credentials',
+        },
+      });
     }
 
     if (user.password !== password) {
-      return response.status(401).json({ msg: 'Invalid credentials' }).end();
+      return response.status(401).json({
+        message: null,
+        code: '1000',
+        details: null,
+        object: {
+          msg: 'Invalid credentials',
+        },
+      });
     }
 
     const { firstName, lastName } = user;
@@ -172,12 +342,26 @@ router.post('/login', validateSchema(UserLoginSchema), (request, response) => {
       expiresIn: '30 days',
     });
 
-    response
-      .status(201)
-      .json({ msg: 'User logged successfully', token, firstName, lastName })
-      .end();
+    return response.status(200).json({
+      message: null,
+      code: '0000',
+      details: null,
+      object: {
+        msg: 'User logged successfully',
+        token,
+        firstName,
+        lastName,
+      },
+    });
   } catch (error) {
-    response.status(500).json({ msg: error }).end();
+    return response.status(500).json({
+      message: null,
+      code: '2000',
+      details: null,
+      object: {
+        msg: error,
+      },
+    });
   }
 });
 
