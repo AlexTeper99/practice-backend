@@ -10,7 +10,7 @@ export const UserPostSchema = yup.object({
     email: yup.string().email().min(8).max(32).required(),
     gender: yup.string().oneOf(['male', 'female'], 'Gender must be male or female').required(),
     birthDate: yup.date().required(),
-    password: yup.string().min(8).max(32).required(),
+    password: yup.string().min(8).max(16).matches(/^[a-zA-Z0-9]+$/).required(),
     newsletterSuscribed: yup.boolean().required(),
     newsletterPartnersSuscribed: yup.boolean().required(),
   }),
@@ -42,9 +42,9 @@ export const UserPutSchema = yup.object({
 
 export const UserPasswordPutSchema = yup.object({
   body: yup.object({
-    currentPassword: yup.string().min(8).max(32).required(),
-    newPassword: yup.string().min(8).max(32).required(),
-    confirmationNewPassword: yup.string().min(8).max(32).required(),
+    currentPassword: yup.string().min(8).max(16).matches(/^[a-zA-Z0-9]+$/).required(),
+    newPassword: yup.string().min(8).max(16).matches(/^[a-zA-Z0-9]+$/).required(),
+    confirmationNewPassword: yup.string().min(8).max(16).matches(/^[a-zA-Z0-9]+$/).required(),
   }),
   params: yup.object({
     id: yup.number().required(),
