@@ -149,6 +149,7 @@ router.delete('/:id', validateSchema(IdParamSchema), (request, response) => {
   try {
     const userIndex = users.findIndex((user) => user.id === id);
     let user = users[userIndex];
+    if (!user) response.status(409).json({ msg: 'User not found' });
     user = { ...user, isDeleted: true };
     users[userIndex] = user;
     response.status(204).end();
